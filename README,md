@@ -24,10 +24,16 @@ This project demonstrates how to consume astronomical alert streams from the Las
 
 Run the sample consumer script:
 ```sh
-python sample_code.py
+python consumer.py
 ```
 
 The script will connect to the Lasair Kafka server, consume up to 10 messages from the `lasair_1568BrightFastTransients` topic, and print each message in formatted JSON.
+
+## Recent Changes
+
+- Updated `consumer.py` to improve error handling and logging.
+- Added comments for better code clarity.
+- Enhanced connection logic for more robust Kafka consumption.
 
 ## Notes
 
