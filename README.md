@@ -4,7 +4,7 @@ This project demonstrates how to consume astronomical alert streams from the Las
 
 ## Project Structure
 
-- `sample_code.py`: Example code to connect to the Lasair Kafka server, consume messages, and print them in JSON format.
+- `consumer.py`: Example code to connect to the Lasair Kafka server, consume messages, and print them in JSON format.
 - `requirements.txt`: Lists required Python packages (currently only `lasair`).
 - `README`: Project documentation.
 
