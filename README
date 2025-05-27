@@ -1,0 +1,36 @@
+# ZTF Stream Consumer
+
+This project demonstrates how to consume astronomical alert streams from the Lasair broker using Python.
+
+## Project Structure
+
+- `sample_code.py`: Example code to connect to the Lasair Kafka server, consume messages, and print them in JSON format.
+- `file.py`: Placeholder file (not used in the main workflow).
+- `requirements.txt`: Lists required Python packages (currently only `lasair`).
+- `README`: Project documentation.
+
+## Requirements
+
+- Python 3.x
+- The `lasair` Python package (see `requirements.txt`).
+
+## Installation
+
+1. Install dependencies:
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+Run the sample consumer script:
+```sh
+python sample_code.py
+```
+
+The script will connect to the Lasair Kafka server, consume up to 10 messages from the `lasair_1568BrightFastTransients` topic, and print each message in formatted JSON.
+
+## Notes
+
+- You may need access credentials or network permissions to connect to the Lasair Kafka server.
+- For more information about Lasair and astronomical alert streams, visit [https://lasair-ztf.lsst.ac.uk/](https://lasair-ztf.lsst.ac.uk/).
