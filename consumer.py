@@ -19,7 +19,7 @@ with open(output_file, 'a') as alert_file, \
      open(error_log, 'a') as err_file:
 
     while True:
-        msg = consumer.poll(timeout=20)
+        msg = consumer.poll(timeout=60)
         now = datetime.utcnow().isoformat()
 
         if msg is None:
