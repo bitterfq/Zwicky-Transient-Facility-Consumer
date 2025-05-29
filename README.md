@@ -4,14 +4,14 @@ This project demonstrates how to consume astronomical alert streams from the Las
 
 ## Project Structure
 
-- `consumer.py`: Example code to connect to the Lasair Kafka server, consume messages, and print them in JSON format.
-- `requirements.txt`: Lists required Python packages (currently only `lasair`).
-- `README`: Project documentation.
+- `consumer.py`: Main code to connect to the Lasair Kafka server and consume messages from multiple topics using separate threads.
+- `requirements.txt`: Lists required Python packages (`lasair`, `astropy`).
+- `README.md`: Project documentation.
 
 ## Requirements
 
 - Python 3.x
-- The `lasair` Python package (see `requirements.txt`).
+- The `lasair` and `astropy` Python packages (see `requirements.txt`).
 
 ## Installation
 
@@ -22,18 +22,25 @@ This project demonstrates how to consume astronomical alert streams from the Las
 
 ## Usage
 
-Run the sample consumer script:
+Run the consumer script:
 ```sh
 python consumer.py
 ```
 
-The script will connect to the Lasair Kafka server, consume up to 10 messages from the `lasair_1568BrightFastTransients` topic, and print each message in formatted JSON.
+The script will connect to the Lasair Kafka server and start multiple consumer instances (each in its own thread), listening to different topics. Alerts are logged to separate files for each consumer, and both event and error logs are maintained.
+
+## How it works
+
+- Each consumer instance runs in its own thread and listens to a specific Kafka topic.
+- Alerts are parsed, Julian Dates are converted to UTC, and all data is logged.
+- The script is designed to run continuously and handle multiple streams at once.
 
 ## Recent Changes
 
-- Updated `consumer.py` to improve error handling and logging.
-- Added comments for better code clarity.
-- Enhanced connection logic for more robust Kafka consumption.
+- Refactored `consumer.py` into a class-based design for multiple concurrent consumers.
+- Added threading support to allow multiple consumers to run in parallel.
+- Improved error handling and logging.
+- Added Julian Date to UTC conversion for alert timestamps.
 
 ## Notes
 
