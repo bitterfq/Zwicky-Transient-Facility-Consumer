@@ -26,7 +26,7 @@ class ZTFAlertConsumer:
              open(self.error_log, 'a') as err_file:
 
             while True:
-                msg = self.consumer.poll(timeout=60)
+                msg = self.consumer.poll(timeout=120)
                 now = datetime.utcnow().isoformat()
 
                 if msg is None:
@@ -101,11 +101,23 @@ if __name__ == "__main__":
         error_log='logs/errors_ft.log'
     )
 
+    consumer_loose = ZTFAlertConsumer(
+        kafka_server='kafka.lsst.ac.uk:9092', 
+        group_id='loose_alerts',
+        topic='lasair_1568loosetestfilter',
+        output_file='data/alerts_log_loose.jsonl', 
+        event_log='logs/event_loose.log', 
+        error_log='logs/errors_loose.log'
+    )
+
     t1 = threading.Thread(target=consumer.run)
     t2 = threading.Thread(target=consumer_ft.run)
-
+    t3 = threading.Thread(target=consumer_loose.run)
+    
     t1.start()
     t2.start()
+    t3.start()
 
     t1.join()
     t2.join()
+    t3.join()
