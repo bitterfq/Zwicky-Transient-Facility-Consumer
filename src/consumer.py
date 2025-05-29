@@ -2,12 +2,14 @@ import json
 from datetime import datetime
 from lasair import lasair_consumer
 from astropy.time import Time
+from fetch_stamps import fetch_and_save_all
 import threading
+import os
 
 class ZTFAlertConsumer:
-    def __init__(self, kafka_server, group_id, topic, 
-                 output_file='data/alerts_log.jsonl', 
-                 event_log='logs/event.log', 
+    def __init__(self, kafka_server, group_id, topic,
+                 output_file='data/alerts_log.jsonl',
+                 event_log='logs/event.log',
                  error_log='logs/errors.log'):
         self.kafka_server = kafka_server
         self.group_id = group_id
@@ -71,6 +73,12 @@ class ZTFAlertConsumer:
                     evt_file.write(log_msg + '\n')
                     evt_file.flush()
 
+                    try:
+                        fetch_and_save_all(object_id, outdir="images")
+                    except Exception as stamp_err:
+                        err_file.write(f"[{now}] Stamp fetch error for {object_id}: {stamp_err}\n")
+                        err_file.flush()
+
                 except Exception as e:
                     error_msg = f"[{now}] JSON parse error: {e}"
                     print(error_msg)
@@ -80,13 +88,13 @@ class ZTFAlertConsumer:
 if __name__ == "__main__":
     consumer = ZTFAlertConsumer(
         kafka_server='kafka.lsst.ac.uk:9092',
-        group_id='bright_fast_alerts',
+        group_id='bright_fast_transient_alerts',
         topic='lasair_1568BrightFastTransients'
     )
 
     consumer_ft = ZTFAlertConsumer(
         kafka_server='kafka.lsst.ac.uk:9092', 
-        group_id='fast_transient_alert',
+        group_id='fast_transient_alerts',
         topic='lasair_1568FastTransients',
         output_file='data/alerts_log_ft.jsonl', 
         event_log='logs/event_ft.log', 
