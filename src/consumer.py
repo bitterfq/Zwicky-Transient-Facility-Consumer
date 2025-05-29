@@ -26,7 +26,7 @@ class ZTFAlertConsumer:
              open(self.error_log, 'a') as err_file:
 
             while True:
-                msg = self.consumer.poll(timeout=120)
+                msg = self.consumer.poll(timeout=300)
                 now = datetime.utcnow().isoformat()
 
                 if msg is None:
