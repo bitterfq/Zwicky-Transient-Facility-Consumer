@@ -8,25 +8,22 @@ import os
 
 class ZTFAlertConsumer:
     def __init__(self, kafka_server, group_id, topic,
-                 output_file='data/alerts_log.jsonl',
+                 base_data_dir='data/alerts_partitioned',
                  event_log='logs/event.log',
                  error_log='logs/errors.log'):
         self.kafka_server = kafka_server
         self.group_id = group_id
         self.topic = topic
-        self.output_file = output_file
+        self.base_data_dir = base_data_dir
         self.event_log = event_log
         self.error_log = error_log
         self.consumer = lasair_consumer(self.kafka_server, self.group_id, self.topic)
         print(f"[{datetime.utcnow()}] Connected to Kafka topic: {self.topic}")
 
     def run(self):
-        with open(self.output_file, 'a') as alert_file, \
-             open(self.event_log, 'a') as evt_file, \
-             open(self.error_log, 'a') as err_file:
-
+        with open(self.event_log, 'a') as evt_file, open(self.error_log, 'a') as err_file:
             while True:
-                msg = self.consumer.poll(timeout=300)
+                msg = self.consumer.poll(timeout=1800)
                 now = datetime.utcnow().isoformat()
 
                 if msg is None:
@@ -55,69 +52,71 @@ class ZTFAlertConsumer:
                             try:
                                 t = Time(jd_val, format='jd')
                                 alert[utc_field] = t.iso
-                                conversion_msg = f"[{now}] Converted {jd_field} to {utc_field}"
-                                print(conversion_msg)
-                                evt_file.write(conversion_msg + '\n')
+                                evt_file.write(f"[{now}] Converted {jd_field} to {utc_field}\n")
                             except Exception as conv_err:
                                 alert[utc_field] = None
-                                error_msg = f"[{now}] Failed to convert {jd_field}: {conv_err}"
-                                print(error_msg)
-                                err_file.write(error_msg + '\n')
-
-                    alert_file.write(json.dumps(alert) + '\n')
-                    alert_file.flush()
+                                err_file.write(f"[{now}] Failed to convert {jd_field}: {conv_err}\n")
 
                     object_id = alert.get('objectId', 'unknown')
-                    log_msg = f"[{now}] Logged alert for objectId: {object_id}"
-                    print(log_msg)
-                    evt_file.write(log_msg + '\n')
+                    utc_date = alert.get("utc_latest_detection", "")[:10]  # e.g., '2025-05-28'
+
+                    if not utc_date:
+                        err_file.write(f"[{now}] Missing utc_latest_detection for {object_id}\n")
+                        continue
+
+                    # Write to date-partitioned alerts file
+                    output_folder = os.path.join(self.base_data_dir, f"date={utc_date}")
+                    os.makedirs(output_folder, exist_ok=True)
+                    alert_path = os.path.join(output_folder, "alerts.jsonl")
+                    with open(alert_path, 'a') as f:
+                        f.write(json.dumps(alert) + '\n')
+
+                    # Save timestamped images in dated folder
+                    image_folder = f"images/by_date/{utc_date}"
+                    os.makedirs(image_folder, exist_ok=True)
+                    fetch_and_save_all(object_id, alert["utc_latest_detection"], outdir=image_folder)
+
+                    evt_file.write(f"[{now}] Processed alert for objectId: {object_id}\n")
                     evt_file.flush()
 
-                    try:
-                        fetch_and_save_all(object_id, outdir="images")
-                    except Exception as stamp_err:
-                        err_file.write(f"[{now}] Stamp fetch error for {object_id}: {stamp_err}\n")
-                        err_file.flush()
-
                 except Exception as e:
-                    error_msg = f"[{now}] JSON parse error: {e}"
-                    print(error_msg)
-                    err_file.write(error_msg + '\n')
+                    err_file.write(f"[{now}] JSON parse error or processing failure: {e}\n")
                     err_file.flush()
 
+
 if __name__ == "__main__":
-    consumer = ZTFAlertConsumer(
+    '''consumer = ZTFAlertConsumer(
         kafka_server='kafka.lsst.ac.uk:9092',
         group_id='bright_fast_transient_alerts',
         topic='lasair_1568BrightFastTransients'
-    )
+    )'''
 
-    consumer_ft = ZTFAlertConsumer(
+    '''consumer_ft = ZTFAlertConsumer(
         kafka_server='kafka.lsst.ac.uk:9092', 
         group_id='fast_transient_alerts',
         topic='lasair_1568FastTransients',
         output_file='data/alerts_log_ft.jsonl', 
         event_log='logs/event_ft.log', 
         error_log='logs/errors_ft.log'
-    )
+    )'''
 
     consumer_loose = ZTFAlertConsumer(
         kafka_server='kafka.lsst.ac.uk:9092', 
-        group_id='loose_alerts',
+        group_id='ztf_loose_repartitioned_v1',
         topic='lasair_1568loosetestfilter',
         output_file='data/alerts_log_loose.jsonl', 
         event_log='logs/event_loose.log', 
         error_log='logs/errors_loose.log'
     )
 
-    t1 = threading.Thread(target=consumer.run)
-    t2 = threading.Thread(target=consumer_ft.run)
+    #t1 = threading.Thread(target=consumer.run)
+    #t2 = threading.Thread(target=consumer_ft.run)
     t3 = threading.Thread(target=consumer_loose.run)
     
-    t1.start()
-    t2.start()
+    #t1.start()
+    #t2.start()
     t3.start()
 
-    t1.join()
-    t2.join()
+    #t1.join()
+    #t2.join()
     t3.join()
