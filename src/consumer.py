@@ -104,9 +104,8 @@ if __name__ == "__main__":
         kafka_server='kafka.lsst.ac.uk:9092', 
         group_id='ztf_loose_repartitioned_v1',
         topic='lasair_1568loosetestfilter',
-        output_file='data/alerts_log_loose.jsonl', 
-        event_log='logs/event_loose.log', 
-        error_log='logs/errors_loose.log'
+        event_log='logs/loose/event_loose.log', 
+        error_log='logs/loose/errors_loose.log'
     )
 
     #t1 = threading.Thread(target=consumer.run)
