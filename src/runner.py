@@ -1,25 +1,26 @@
-from sync_to_s3 import main as sync_main
-import schedule
 import time
+import subprocess
 import logging
 from datetime import datetime
 
-log_file = "logs/sync_runner.log"
+LOG_FILE = 'logs/runner.log'
+INTERVAL = 2 * 60 * 60 # 2 hours
+
+# === SETUP LOGGING ===
 logging.basicConfig(
-    filename=log_file,
+    filename=LOG_FILE,
     level=logging.INFO,
-    format='[%(asctime)s] %(message)s',
-    datefmt='%Y-%m-%dT%H:%M:%S'
+    format='[%(asctime)s] %(message)s'
 )
 
-logging.info("Scheduler started, will run every 2 hours.")
+def run_sync():
+    timestamp = datetime.utcnow().isoformat()
+    logging.info(f"⏱️ Running sync at {timestamp}")
+    subprocess.run(['python3', 'src/sync_to_s3.py'])
 
-# Force immediate first run
-logging.info("Running initial sync immediately for sanity check.")
-sync_main()
-
-schedule.every(2).hours.do(sync_main)
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+if __name__ == "__main__":
+    logging.info("📌 Runner started. Will sync every 2 hours.")
+    #run_sync()  # Run immediately at startup
+    while True:
+        time.sleep(INTERVAL)
+        run_sync()

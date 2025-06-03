@@ -20,7 +20,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(message)s',
     handlers=[
-        logging.FileHandler(LOG_FILE),
+        logging.FileHandler(LOG_FILE, mode='a'),
         logging.StreamHandler()
     ]
 )
@@ -51,7 +51,7 @@ def upload_directory(local_dir, s3_prefix):
         if file_path.is_file():
             s3_key = os.path.join(s3_prefix, file_path.relative_to(local_dir).as_posix())
             if s3_etag_matches(file_path, BUCKET_NAME, s3_key):
-                logging.info(f"⏭️ Skipped (unchanged): {file_path}")
+                #logging.info(f"⏭️ Skipped (unchanged): {file_path}")
                 continue
             try:
                 s3.upload_file(str(file_path), BUCKET_NAME, s3_key)
@@ -63,12 +63,16 @@ def upload_directory(local_dir, s3_prefix):
                 logging.error(f"❌ Failed to upload {file_path}: {e}")
 
 def main():
+    logging.info("=" * 60)
+    logging.info("🕒 Starting sync cycle")
     for local_path, s3_prefix in LOCAL_DIRECTORIES:
         if os.path.exists(local_path):
             logging.info(f"🔄 Syncing directory: {local_path}")
             upload_directory(local_path, s3_prefix)
         else:
             logging.warning(f"⚠️ Skipped missing path: {local_path}")
-
+    logging.info("✅ Sync cycle complete")
+    logging.info("=" * 60)
+    logging.info("\n")
 if __name__ == "__main__":
     main()
