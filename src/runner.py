@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 LOG_FILE = 'logs/runner.log'
-INTERVAL = 2 * 60 * 60 # 2 hours
+INTERVAL = 6 * 60 * 60 # 6 hours
 
 # === SETUP LOGGING ===
 logging.basicConfig(
@@ -19,7 +19,7 @@ def run_sync():
     subprocess.run(['python3', 'src/sync_to_s3.py'])
 
 if __name__ == "__main__":
-    logging.info("📌 Runner started. Will sync every 2 hours.")
+    logging.info("📌 Runner started. Will sync every 6 hours.")
     #run_sync()  # Run immediately at startup
     while True:
         time.sleep(INTERVAL)
