@@ -3,19 +3,25 @@ import re
 import pandas as pd
 import snowflake.connector
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 
 # CONFIG
 bucket = "ztf-pipeline-data"
 prefix = "images/by_date/"
 snowflake_config = {
-    "account": "htiiiwn-scb82473",
-    "user": "bitterfq",
-    "password": "<your_password>",
-    "warehouse": "COMPUTE_WH",
-    "database": "ztf_data",
-    "schema": "public",
-    "role": "ACCOUNTADMIN"
+    "account": os.getenv("SNOWFLAKE_ACCOUNT"),
+    "user": os.getenv("SNOWFLAKE_USER"),
+    "password": os.getenv("SNOWFLAKE_PASSWORD"),
+    "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
+    "database": os.getenv("SNOWFLAKE_DATABASE"),
+    "schema": os.getenv("SNOWFLAKE_SCHEMA"),
+    "role": os.getenv("SNOWFLAKE_ROLE")
 }
+
 
 # SETUP
 s3 = boto3.client("s3")
