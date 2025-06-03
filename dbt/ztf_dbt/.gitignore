@@ -1,0 +1,10 @@
+
+target/
+dbt_packages/
+logs/
+.env
+
+
+# Ignore local profile secrets (never commit these)
+~/.dbt/
+.env

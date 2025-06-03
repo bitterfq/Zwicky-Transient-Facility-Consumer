@@ -1,3 +1,10 @@
 logs/
 data/
 images/
+
+dbt/ztf_dbt/target/
+dbt/ztf_dbt/logs/
+dbt/ztf_dbt/dbt_modules/
+
+~/.dbt/
+.env
