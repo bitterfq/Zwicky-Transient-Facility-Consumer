@@ -1,3 +1,13 @@
+"""
+sync_to_s3.py
+
+This script synchronizes local directories containing ZTF alert and
+image data to an S3 bucket.
+It uploads only new or changed files by comparing local MD5 hashes
+with S3 ETags, and logs all actions.
+Intended for use in automated workflows such as Airflow DAGs.
+"""
+
 import os
 import boto3
 import hashlib
@@ -5,14 +15,19 @@ import logging
 from botocore.exceptions import NoCredentialsError, ClientError
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+
+load_dotenv('/opt/airflow/.env')
+
 
 # === CONFIG ===
 BUCKET_NAME = 'ztf-pipeline-data'
 LOCAL_DIRECTORIES = [
-    ('data/alerts_partitioned', 'alerts_partitioned'),
-    ('images/by_date', 'images/by_date')
+    ('/opt/airflow/data/alerts_partitioned', 'alerts_partitioned'),
+    ('/opt/airflow/images/by_date', 'images/by_date')
 ]
-LOG_FILE = 'logs/sync_to_s3.log'
+LOG_FILE = '/opt/airflow/custom_logs/sync_to_s3.log'
 
 # === SETUP LOGGING ===
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)

@@ -1,3 +1,15 @@
+"""
+consumer.py
+
+Kafka consumer for ZTF alert streams using the Lasair broker.
+- Consumes alerts from a specified Kafka topic.
+- Converts Julian dates to UTC ISO format.
+- Writes alerts to date-partitioned JSONL files.
+- Downloads and saves associated image cutouts for each alert.
+- Logs events and errors for monitoring and debugging.
+- Designed for use in automated pipelines and supports multi-threaded consumption.
+"""
+
 import json
 from datetime import datetime
 from lasair import lasair_consumer
@@ -74,7 +86,7 @@ class ZTFAlertConsumer:
                     # Save timestamped images in dated folder
                     image_folder = f"images/by_date/{utc_date}"
                     os.makedirs(image_folder, exist_ok=True)
-                    fetch_and_save_all(object_id, alert["utc_latest_detection"], outdir=image_folder)
+                    fetch_and_save_all(object_id, image_folder)
 
                     evt_file.write(f"[{now}] Processed alert for objectId: {object_id}\n")
                     evt_file.flush()

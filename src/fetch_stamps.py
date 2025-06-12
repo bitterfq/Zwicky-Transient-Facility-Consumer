@@ -25,18 +25,22 @@ def save_stamp_png(stamp, filename):
     else:
         print(f"No image data found in the FITS stamp for {filename}.")
 
-def fetch_and_save_all(ztf_id, utc_latest, outdir="."):
+def fetch_and_save_all(ztf_id, outdir="."):
     try:
         stamps = fetch_stamps(ztf_id)
         names = ["science", "template", "difference"]
-        safe_time = utc_latest.replace(":", "-").replace(" ", "T")  # ISO-safe timestamp
         for stamp, name in zip(stamps, names):
-            filename = f"{ztf_id}_{safe_time}_{name}.png"
-            png_path = os.path.join(outdir, filename)
-            save_stamp_png(stamp, png_path)
+            filename = f"{ztf_id}_{name}.png"
+            filepath = os.path.join(outdir, filename)
+
+            if os.path.exists(filepath):
+                print(f"[SKIP] {filepath} already exists")
+                continue
+
+            save_stamp_png(stamp, filepath)
+
     except Exception as e:
         print(f"Error: {e}")
-
 
 if __name__ == "__main__":
     import sys
